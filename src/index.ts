@@ -10,6 +10,20 @@ const startApp = async () => {
   if (!process.env.JWT_KEY) {
     throw new NotFoundError('JWT_KEY k8s secret must be defined.');
   }
+
+  if (!process.env.EXPIRATION_WINDOW_SECONDS) {
+    throw new NotFoundError(
+      'EXPIRATION_WINDOW_SECONDS k8s env var must be defined.'
+    );
+  } else {
+    logIt.out(
+      LogType.INFO,
+      `Order expiration window set to ${
+        parseInt(process.env.EXPIRATION_WINDOW_SECONDS) / 60
+      } minutes.`
+    );
+  }
+
   if (!process.env.MONGO_URI) {
     throw new NotFoundError('MONGO_URI k8s env var must be defined.');
   }
