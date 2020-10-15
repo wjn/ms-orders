@@ -36,6 +36,9 @@ const orderSchema = new mongoose.Schema(
     expiresAt: {
       type: mongoose.Schema.Types.Date,
     },
+    // It appears taht we can pass in a property called `ticketId`
+    // with the Ticket.id to satisfy this with Mongo. I'm confused as
+    // to why `ticketId` works as a property name.
     ticket: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Ticket',

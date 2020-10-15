@@ -6,6 +6,8 @@ import {
   requireAuth,
   validateRequest,
   BadRequestError,
+  logIt,
+  LogType,
 } from '@nielsendigital/ms-common';
 import { body } from 'express-validator';
 import { Ticket } from '../models/ticket';
@@ -13,21 +15,25 @@ import { Order } from '../models/order';
 
 const router = express.Router();
 
+// TODO: use the process.env.EXPIRATION_WINDOW_SECONDS k8s env var instead
 const EXPIRATION_WINDOW_SECONDS = 15 * 60;
 
 router.post(
   '/api/orders',
-  requireAuth, // << currentUser is guaranteed to be defined.
+
+  // Notes about requireAuth
+  // * currentUser is guaranteed to be defined if passes auth.
+  // * If auth fails a 401 NotAuthorized error is thrown
+  requireAuth,
   [
     body('ticketId')
       .not()
       .isEmpty()
       // validate that the id is a Mongo ID << does couple a bit with ticketing
-      .custom((input: string) => {
-        mongoose.Types.ObjectId.isValid(input);
-      })
+      .custom((input: string) => mongoose.Types.ObjectId.isValid(input))
       .withMessage('TicketId must be provided'),
   ],
+  // RequestValidationErrors return 400 BadRequest
   validateRequest,
   async (req: Request, res: Response) => {
     const { ticketId } = req.body;
@@ -36,11 +42,16 @@ router.post(
     const ticket = await Ticket.findById(ticketId);
 
     if (!ticket) {
+      // 404
       throw new NotFoundError('Ticket ID not found');
     }
 
     // 2. insure that ticket isn't already reserved
-    if (await ticket.isReserved()) {
+    const isReserved = await ticket.isReserved();
+    logIt.out(LogType.INFO, `isReserved: ${isReserved}`);
+
+    if (isReserved) {
+      // 400
       throw new BadRequestError('Ticket is already reserved');
     }
 
