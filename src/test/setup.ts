@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { app } from '../app';
 import request, { Test } from 'supertest';
 import jwt from 'jsonwebtoken';
-import { TicketDoc } from '../models/ticket';
+import { Ticket, TicketDoc } from '../models/ticket';
 import { TicketCreatedEvent } from '@nielsendigital/ms-common';
 
 declare global {
@@ -32,13 +32,18 @@ declare global {
 
       OMIT_VALIDATION_COOKIE: undefined;
       USE_GENERATED_COOKIE: null;
-      getTicket(ticketId: string): Test;
-      createTicket(body: object, userCookie?: string[] | null): Test;
+      buildTicket(): Promise<TicketDoc>;
+      createEntity(
+        route: string,
+        body: object,
+        userCookie?: string[] | null
+      ): Test;
       changeTicket(
         body: object,
         userCookie: string[] | null | undefined,
         ticketId?: string | null
       ): Test;
+      getTicket(ticketId: string): Test;
     }
   }
 }
@@ -160,17 +165,28 @@ global.getUserIdFromCookie = (cookie: string): string => {
 global.OMIT_VALIDATION_COOKIE = undefined;
 global.USE_GENERATED_COOKIE = null;
 
+// build a ticket and save it to mongo
+global.buildTicket = async () => {
+  const ticket = Ticket.build({
+    title: global.ticketTitleValid,
+    price: global.ticketPriceValid,
+  });
+  await ticket.save();
+
+  return ticket;
+};
+
 global.getTicket = (ticketId) => {
   return request(app).get(`/api/tickets/${ticketId}`).send();
 };
 
-global.createTicket = (body, userCookie = null) => {
+global.createEntity = (route, body, userCookie = null) => {
   const _userCookie = userCookie ? userCookie : global.getAuthCookie();
+  if (!route) {
+    throw new Error('route is undefined');
+  }
 
-  return request(app)
-    .post('/api/tickets')
-    .set('Cookie', _userCookie)
-    .send(body);
+  return request(app).post(route).set('Cookie', _userCookie).send(body);
 };
 
 global.changeTicket = (body, userCookie, ticketId = null) => {
