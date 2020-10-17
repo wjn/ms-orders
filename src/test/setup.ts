@@ -4,7 +4,6 @@ import { app } from '../app';
 import request, { Test } from 'supertest';
 import jwt from 'jsonwebtoken';
 import { Ticket, TicketDoc } from '../models/ticket';
-import { TicketCreatedEvent } from '@nielsendigital/ms-common';
 
 declare global {
   namespace NodeJS {
