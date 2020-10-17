@@ -60,10 +60,12 @@ it('should give a 204 when the order is canceled', async () => {
     .send({ ticketId: ticket.id })
     .expect(201);
 
+  // creating the order will call the natsWrapper...publish() function
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
+
   logIt.out(LogType.NOTICE, `ticket ${ticket.id} created`);
 
   // make a request to cancel the order
-
   logIt.out(LogType.NOTICE, `requesting to delete order : ${order.id}`);
 
   await request(app)
@@ -71,6 +73,9 @@ it('should give a 204 when the order is canceled', async () => {
     .set('Cookie', user)
     .send()
     .expect(204);
+
+  // deleting an order calls the natsWrapper...publish() function a second time
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(2);
 
   // validate the order is canceled by fetching through the `show` route
   const fetchedOrder = await request(app)
