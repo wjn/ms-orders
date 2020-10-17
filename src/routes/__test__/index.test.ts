@@ -1,5 +1,7 @@
 import request from 'supertest';
 import { app } from '../../app';
+import { natsWrapper } from '@nielsendigital/ms-common';
+
 import { Order, OrderStatus } from '../../models/order';
 import { Ticket } from '../../models/ticket';
 

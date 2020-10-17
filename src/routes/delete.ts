@@ -6,10 +6,10 @@ import {
   LogType,
   NotAuthorizedError,
   NotFoundError,
+  natsWrapper,
   requireAuth,
 } from '@nielsendigital/ms-common';
 import { OrderCanceledPublisher } from '../events/publishers/order-canceled-publisher';
-import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 

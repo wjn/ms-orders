@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { app } from '../../app';
+import { natsWrapper } from '@nielsendigital/ms-common';
 import { Ticket } from '../../models/ticket';
 import { Order, OrderStatus } from '../../models/order';
-import { natsWrapper } from '../../nats-wrapper';
 
 it('should have a route handler listening to /api/tickets for POST requests', async () => {
   const response = await request(app).post('/api/orders').send({});

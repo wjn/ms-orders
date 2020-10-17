@@ -1,8 +1,7 @@
-import { logIt, LogType } from '@nielsendigital/ms-common';
+import { logIt, LogType, natsWrapper } from '@nielsendigital/ms-common';
 import request from 'supertest';
 import { app } from '../../app';
 import { OrderStatus } from '../../models/order';
-import { natsWrapper } from '../../nats-wrapper';
 
 it('should give a 404 when the order does not exist', async () => {
   const ticket = await global.buildTicket();

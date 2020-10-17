@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import express, { Request, Response } from 'express';
 import {
   OrderStatus,
+  natsWrapper,
   NotFoundError,
   requireAuth,
   validateRequest,
@@ -13,8 +14,6 @@ import { body } from 'express-validator';
 import { Ticket } from '../models/ticket';
 import { Order } from '../models/order';
 import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher';
-import { natsWrapper } from '../nats-wrapper';
-
 const router = express.Router();
 
 // TODO: use the process.env.EXPIRATION_WINDOW_SECONDS k8s env var instead
