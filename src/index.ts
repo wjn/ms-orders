@@ -78,9 +78,11 @@ const startApp = async () => {
       useUnifiedTopology: true,
       useCreateIndex: true,
     });
+
     logIt.out(LogType.SUCCESS, 'Connected to mongoDB');
   } catch (err) {
-    logIt.out(LogType.ERROR, err);
+    logIt.out(LogType.ERROR, 'Mongoose Error');
+    // logIt.out(LogType.ERROR, err);
   }
 
   // Listen for traffic

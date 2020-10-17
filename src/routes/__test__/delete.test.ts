@@ -1,6 +1,8 @@
+import { logIt, LogType } from '@nielsendigital/ms-common';
 import request from 'supertest';
 import { app } from '../../app';
 import { OrderStatus } from '../../models/order';
+import { natsWrapper } from '../../nats-wrapper';
 
 it('should give a 404 when the order does not exist', async () => {
   const ticket = await global.buildTicket();
@@ -47,6 +49,9 @@ it('should give a 204 when the order is canceled', async () => {
   const ticket = await global.buildTicket();
   const user = global.getAuthCookie();
 
+  logIt.out(LogType.INFO, 'Working inside delete.test.ts');
+  logIt.out(LogType.INFO, ticket);
+
   // make a request to create an order
   const { body: order } = await request(app)
     .post('/api/orders')
@@ -55,7 +60,12 @@ it('should give a 204 when the order is canceled', async () => {
     .send({ ticketId: ticket.id })
     .expect(201);
 
+  logIt.out(LogType.NOTICE, `ticket ${ticket.id} created`);
+
   // make a request to cancel the order
+
+  logIt.out(LogType.NOTICE, `requesting to delete order : ${order.id}`);
+
   await request(app)
     .delete(`/api/orders/${order.id}`)
     .set('Cookie', user)
@@ -71,5 +81,3 @@ it('should give a 204 when the order is canceled', async () => {
 
   expect(fetchedOrder.body.status).toEqual(OrderStatus.CanceledByUser);
 });
-
-it.todo('should publish an order:canceledbyuser when canceled');

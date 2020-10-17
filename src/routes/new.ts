@@ -12,6 +12,8 @@ import {
 import { body } from 'express-validator';
 import { Ticket } from '../models/ticket';
 import { Order } from '../models/order';
+import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -43,8 +45,11 @@ router.post(
 
     if (!ticket) {
       // 404
+      logIt.out(LogType.WARNING, `Ticket ${ticketId} was not found.`);
       throw new NotFoundError('Ticket ID not found');
     }
+
+    logIt.out(LogType.SUCCESS, `Ticket ${ticketId} was found.`);
 
     // 2. insure that ticket isn't already reserved
     const isReserved = await ticket.isReserved();
@@ -73,6 +78,25 @@ router.post(
     await order.save();
 
     // 5. publish order:created event
+    try {
+      new OrderCreatedPublisher(natsWrapper.client).publish({
+        id: order.id,
+        status: order.status,
+        userId: order.userId,
+        // get a UTC timestamp from expiresAt Date Object.
+        expiresAt: order.expiresAt.toISOString(),
+        ticket: {
+          id: ticket.id,
+          title: ticket.title,
+          price: ticket.price,
+          userId: order.userId,
+        },
+      });
+    } catch (err) {
+      logIt.out(LogType.FAIL, err);
+      throw new BadRequestError('Event could not be published to NATS');
+    }
+
     res.status(201).send(order);
   }
 );

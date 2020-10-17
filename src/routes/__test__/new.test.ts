@@ -30,11 +30,6 @@ it('should return 404 NotFound error if ticket does not exist', async () => {
     .expect(404);
 });
 
-// TODO: Data and response validation
-// it('should return an error if invalid userId is provided', async () => {})
-// it('should return an error if invalid orderStatus is provided', async () => {})
-// it('should return a 404 error if valid order is not found', async () => {});
-
 /**
  * Ticket.isReserved()
  *
@@ -44,13 +39,7 @@ it('should return 404 NotFound error if ticket does not exist', async () => {
  * invoked in the routes/new.ts file.
  */
 it('should return error if ticket is already reserved', async () => {
-  const ticket = Ticket.build({
-    title: global.ticketTitleValid,
-    price: global.ticketPriceValid,
-  });
-
-  // save the ticket to Mongo
-  await ticket.save();
+  const ticket = await global.buildTicket();
 
   const order = Order.build({
     ticket,
@@ -69,13 +58,7 @@ it('should return error if ticket is already reserved', async () => {
 });
 
 it('should reserve a ticket as a successful order', async () => {
-  const ticket = Ticket.build({
-    title: global.ticketTitleValid,
-    price: global.ticketPriceValid,
-  });
-
-  // save the ticket to Mongo
-  await ticket.save();
+  const ticket = await global.buildTicket();
 
   const order = await request(app)
     .post('/api/orders')
@@ -93,5 +76,17 @@ it('should reserve a ticket as a successful order', async () => {
   expect(orderDb?.ticket.toString()).toEqual(ticket.id);
 });
 
-// TODO:
-it.todo('should publish an event on successful order');
+it('should publish an event on successful order', async () => {
+  const ticket = await global.buildTicket();
+  await request(app)
+    .post('/api/orders')
+    .set('Cookie', global.getAuthCookie())
+    .send({ ticketId: ticket.id })
+    .expect(201);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
+});
+// TODO: Data and response validation
+it.todo('should return an error if invalid userId is provided');
+it.todo('should return an error if invalid orderStatus is provided');
+it.todo('should return a 404 error if valid order is not found');
