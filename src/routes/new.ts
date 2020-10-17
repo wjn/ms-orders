@@ -48,7 +48,6 @@ router.post(
 
     // 2. insure that ticket isn't already reserved
     const isReserved = await ticket.isReserved();
-    logIt.out(LogType.INFO, `isReserved: ${isReserved}`);
 
     if (isReserved) {
       // 400
