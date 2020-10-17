@@ -22,6 +22,8 @@ declare global {
       ticketIdGenerated: string;
 
       // Order
+      orderIdInvalid: string;
+      orderIdValid: string;
       orderUserIdValid: string;
       orderUserIdInvalid: string;
       orderStatusInvalid: string;
@@ -93,6 +95,8 @@ global.ticketPriceInvalidLessThanZero = -10;
 global.ticketIdGenerated = getMongooseId();
 
 // Order
+global.orderIdInvalid = 'invalidOrderId';
+global.orderIdValid = getMongooseId();
 global.orderUserIdValid = 'ValidUserId';
 global.orderUserIdInvalid = 'invalidUserId';
 
@@ -191,7 +195,9 @@ global.createEntity = (route, body, userCookie = null) => {
 
 global.changeTicket = (body, userCookie, ticketId = null) => {
   const _ticketId = ticketId ? ticketId : global.ticketIdGenerated;
-  // prefer provided cookie. `null` will generate a cookie. `undefined` will omit setting the auth cookie.
+  // prefer provided cookie (default).
+  // `null` will generate a cookie.
+  // `undefined` will omit setting the auth cookie.
   switch (userCookie) {
     case global.OMIT_VALIDATION_COOKIE:
       return request(app).put(`/api/tickets/${_ticketId}`).send(body);
