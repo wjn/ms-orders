@@ -96,6 +96,7 @@ router.post(
       throw new BadRequestError('Event could not be published to NATS');
     }
 
+    // 6. send confirmation that the order was created
     res.status(201).send(order);
   }
 );
