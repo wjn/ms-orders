@@ -80,6 +80,7 @@ router.post(
     try {
       new OrderCreatedPublisher(natsWrapper.client).publish({
         id: order.id,
+        version: order.version,
         status: order.status,
         userId: order.userId,
         // get a UTC timestamp from expiresAt Date Object.
@@ -89,6 +90,7 @@ router.post(
           title: ticket.title,
           price: ticket.price,
           userId: order.userId,
+          version: ticket.version,
         },
       });
     } catch (err) {

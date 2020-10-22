@@ -43,6 +43,7 @@ router.delete(
     // publish order:canceledbyuser event
     new OrderCanceledPublisher(natsWrapper.client).publish({
       id: order.id,
+      version: order.version,
       status: order.status,
       userId: order.userId,
       // get a UTC timestamp from expiresAt Date Object.
@@ -52,6 +53,7 @@ router.delete(
         title: order.ticket.title,
         price: order.ticket.price,
         userId: order.userId,
+        version: order.ticket.version,
       },
     });
 
