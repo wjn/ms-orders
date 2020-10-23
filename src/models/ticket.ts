@@ -47,7 +47,21 @@ const ticketSchema = new mongoose.Schema(
 
 // sets version key to 'version' (default is '_v')
 ticketSchema.set('versionKey', 'version');
-ticketSchema.plugin(updateIfCurrentPlugin);
+// ticketSchema.plugin(updateIfCurrentPlugin);
+
+// use the $where property to implement the updateIfCurrentPlugin functionality
+// that enforces optimistic concurrency control by managing the version number
+// when a record is saved.
+// https://mongoosejs.com/docs/api/model.html#model_Model-$where
+ticketSchema.pre('save', function (done) {
+  // @ts-ignore
+  // $where is not included properly in the mongoose type definition
+  this.$where = {
+    version: this.get('version') - 1,
+  };
+
+  done();
+});
 
 ticketSchema.statics.findByIdAndPreviousVersion = (event: {
   id: string;
