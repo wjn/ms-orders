@@ -1,4 +1,3 @@
-import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import mongoose from 'mongoose';
 import { Order, OrderStatus } from './order';
 
@@ -17,10 +16,7 @@ export interface TicketDoc extends mongoose.Document {
 
 export interface TicketModel extends mongoose.Model<TicketDoc> {
   build(attrs: TicketAttrs): TicketDoc;
-  findByIdAndPreviousVersion(event: {
-    id: string;
-    version: number;
-  }): Promise<TicketDoc | null>;
+  findByIdAndPreviousVersion(event: { id: string; version: number }): Promise<TicketDoc | null>;
 }
 
 const ticketSchema = new mongoose.Schema(
@@ -63,10 +59,7 @@ ticketSchema.pre('save', function (done) {
   done();
 });
 
-ticketSchema.statics.findByIdAndPreviousVersion = (event: {
-  id: string;
-  version: number;
-}) => {
+ticketSchema.statics.findByIdAndPreviousVersion = (event: { id: string; version: number }) => {
   return Ticket.findOne({
     _id: event.id,
     version: event.version - 1,
@@ -93,11 +86,7 @@ ticketSchema.methods.isReserved = async function (): Promise<boolean> {
   const existingOrder = await Order.findOne({
     ticket: this,
     status: {
-      $in: [
-        OrderStatus.Created,
-        OrderStatus.AwaitingPayment,
-        OrderStatus.Complete,
-      ],
+      $in: [OrderStatus.Created, OrderStatus.AwaitingPayment, OrderStatus.Complete],
     },
   });
 

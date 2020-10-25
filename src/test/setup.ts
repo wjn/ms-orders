@@ -31,6 +31,9 @@ declare global {
       orderTicketValid: TicketDoc;
       orderTicketInvalid: TicketDoc;
 
+      // User
+      userIdValid: string;
+
       OMIT_VALIDATION_COOKIE: undefined;
       USE_GENERATED_COOKIE: null;
       buildTicket(): Promise<TicketDoc>;
@@ -116,6 +119,9 @@ global.orderIdInvalid = 'invalidOrderId';
 global.orderIdValid = getMongooseId();
 global.orderUserIdValid = 'ValidUserId';
 global.orderUserIdInvalid = 'invalidUserId';
+
+// User
+global.userIdValid = getMongooseId();
 
 global.getAuthCookie = (): string[] => {
   // build a JWT payload {id, email}
