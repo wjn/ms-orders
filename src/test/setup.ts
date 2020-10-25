@@ -37,16 +37,8 @@ declare global {
       OMIT_VALIDATION_COOKIE: undefined;
       USE_GENERATED_COOKIE: null;
       buildTicket(): Promise<TicketDoc>;
-      createEntity(
-        route: string,
-        body: object,
-        userCookie?: string[] | null
-      ): Test;
-      changeTicket(
-        body: object,
-        userCookie: string[] | null | undefined,
-        ticketId?: string | null
-      ): Test;
+      createEntity(route: string, body: object, userCookie?: string[] | null): Test;
+      changeTicket(body: object, userCookie: string[] | null | undefined, ticketId?: string | null): Test;
       getTicket(ticketId: string): Test;
     }
   }
@@ -61,13 +53,9 @@ jest.mock('@nielsendigital/ms-common', () => {
     ...original,
     natsWrapper: {
       client: {
-        publish: jest
-          .fn()
-          .mockImplementation(
-            (subject: string, data: string, callback: () => void) => {
-              callback();
-            }
-          ),
+        publish: jest.fn().mockImplementation((subject: string, data: string, callback: () => void) => {
+          callback();
+        }),
       },
     },
   };
@@ -197,6 +185,7 @@ global.buildTicket = async () => {
   const ticket = Ticket.build({
     title: global.ticketTitleValid,
     price: global.ticketPriceValid,
+    id: getMongooseId(),
   });
   await ticket.save();
 
@@ -226,16 +215,10 @@ global.changeTicket = (body, userCookie, ticketId = null) => {
       return request(app).put(`/api/tickets/${_ticketId}`).send(body);
       break;
     case global.USE_GENERATED_COOKIE:
-      return request(app)
-        .put(`/api/tickets/${_ticketId}`)
-        .set('Cookie', global.getAuthCookie())
-        .send(body);
+      return request(app).put(`/api/tickets/${_ticketId}`).set('Cookie', global.getAuthCookie()).send(body);
       break;
     default:
-      return request(app)
-        .put(`/api/tickets/${_ticketId}`)
-        .set('Cookie', userCookie)
-        .send(body);
+      return request(app).put(`/api/tickets/${_ticketId}`).set('Cookie', userCookie).send(body);
       break;
   }
 };

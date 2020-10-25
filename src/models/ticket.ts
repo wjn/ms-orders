@@ -50,8 +50,7 @@ ticketSchema.set('versionKey', 'version');
 // when a record is saved.
 // https://mongoosejs.com/docs/api/model.html#model_Model-$where
 ticketSchema.pre('save', function (done) {
-  // @ts-ignore
-  // $where is not included properly in the mongoose type definition
+  // @ts-ignore $where is not included properly in the mongoose type definition
   this.$where = {
     version: this.get('version') - 1,
   };

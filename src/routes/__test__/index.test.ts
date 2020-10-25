@@ -1,9 +1,5 @@
 import request from 'supertest';
 import { app } from '../../app';
-import { natsWrapper } from '@nielsendigital/ms-common';
-
-import { Order, OrderStatus } from '../../models/order';
-import { Ticket } from '../../models/ticket';
 
 it('should fetch orders for a given user', async () => {
   // create 3 tickets using ticket Model
@@ -17,24 +13,15 @@ it('should fetch orders for a given user', async () => {
   const user2 = global.getAuthCookie();
 
   // create 1 order as user#1
-  await global
-    .createEntity('/api/orders', { ticketId: tickets[1].id }, user1)
-    .expect(201);
+  await global.createEntity('/api/orders', { ticketId: tickets[1].id }, user1).expect(201);
 
   // create 2 orders as user#2
-  const { body: order1 } = await global
-    .createEntity('/api/orders', { ticketId: tickets[2].id }, user2)
-    .expect(201);
+  const { body: order1 } = await global.createEntity('/api/orders', { ticketId: tickets[2].id }, user2).expect(201);
 
-  const { body: order2 } = await global
-    .createEntity('/api/orders', { ticketId: tickets[3].id }, user2)
-    .expect(201);
+  const { body: order2 } = await global.createEntity('/api/orders', { ticketId: tickets[3].id }, user2).expect(201);
 
   // fetch orders for user#2
-  const response = await request(app)
-    .get('/api/orders')
-    .set('Cookie', user2)
-    .expect(200);
+  const response = await request(app).get('/api/orders').set('Cookie', user2).expect(200);
 
   // make sure only user#2's orders are returned
   // make sure only 2 orders come back (user2 owns 2 orders)

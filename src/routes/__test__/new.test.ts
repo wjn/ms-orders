@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { natsWrapper } from '@nielsendigital/ms-common';
-import { Ticket } from '../../models/ticket';
 import { Order, OrderStatus } from '../../models/order';
 
 it('should have a route handler listening to /api/tickets for POST requests', async () => {
@@ -14,10 +13,7 @@ it('should throw a 401 (NotAuthorized) error if user is NOT authenticated', asyn
 });
 
 it('should return a 400 BadRequest error if order body is empty', async () => {
-  const response = await request(app)
-    .post('/api/orders')
-    .set('Cookie', global.getAuthCookie())
-    .send({});
+  const response = await request(app).post('/api/orders').set('Cookie', global.getAuthCookie()).send({});
 
   expect(response.status).toEqual(400);
 });
