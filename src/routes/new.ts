@@ -60,9 +60,7 @@ router.post(
 
     // 3. calculate an expiration date for the order
     const expirationDate = new Date();
-    expirationDate.setSeconds(
-      expirationDate.getSeconds() + EXPIRATION_WINDOW_SECONDS
-    );
+    expirationDate.setSeconds(expirationDate.getSeconds() + EXPIRATION_WINDOW_SECONDS);
 
     // 4. build the order and save to the database
     // 4.a. Build up the order in mongo
@@ -95,7 +93,7 @@ router.post(
       });
     } catch (err) {
       logIt.out(LogType.FAIL, err);
-      throw new BadRequestError('Event could not be published to NATS');
+      throw new BadRequestError('order:created Event could not be published to NATS');
     }
 
     // 6. send confirmation that the order was created

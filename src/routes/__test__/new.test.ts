@@ -82,7 +82,3 @@ it('should publish an event on successful order', async () => {
 
   expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
 });
-// TODO: Data and response validation
-it.todo('should return an error if invalid userId is provided');
-it.todo('should return an error if invalid orderStatus is provided');
-it.todo('should return a 404 error if valid order is not found');
