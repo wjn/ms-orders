@@ -1,11 +1,5 @@
 import { Message } from 'node-nats-streaming';
-import {
-  Topics,
-  Listener,
-  TicketCreatedEvent,
-  TicketData,
-} from '@nielsendigital/ms-common';
-import { queueGroupNames } from '../enums/queue-group-names';
+import { queueGroupNames, Topics, Listener, TicketCreatedEvent, TicketData } from '@nielsendigital/ms-common';
 import { Ticket } from '../../models/ticket';
 
 export class TicketCreatedListener extends Listener<TicketCreatedEvent> {

@@ -1,12 +1,12 @@
 import { Message } from 'node-nats-streaming';
 import {
+  queueGroupNames,
   Topics,
   Listener,
   TicketUpdatedEvent,
   TicketData,
   NotFoundError,
 } from '@nielsendigital/ms-common';
-import { queueGroupNames } from '../enums/queue-group-names';
 import { Ticket } from '../../models/ticket';
 
 export class TicketUpdatedListener extends Listener<TicketUpdatedEvent> {
