@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { OrderStatus } from '@nielsendigital/ms-common';
 import { TicketDoc } from './ticket';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 export { OrderStatus };
 interface OrderAttrs {
@@ -12,6 +13,7 @@ interface OrderAttrs {
 
 interface OrderDoc extends mongoose.Document {
   userId: string;
+  version: number;
   status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
@@ -53,6 +55,23 @@ const orderSchema = new mongoose.Schema(
     },
   }
 );
+
+// sets version key to 'version' (default is '_v')
+orderSchema.set('versionKey', 'version');
+orderSchema.plugin(updateIfCurrentPlugin);
+
+// use the $where property to implement the updateIfCurrentPlugin functionality
+// that enforces optimistic concurrency control by managing the version number
+// when a record is saved.
+// https://mongoosejs.com/docs/api/model.html#model_Model-$where
+// orderSchema.pre('save', function (done) {
+//   // @ts-ignore << $where is not included properly in the mongoose type definition
+//   this.$where = {
+//     version: this.get('version') - 1,
+//   };
+
+//   done();
+// });
 
 orderSchema.statics.build = (attrs: OrderAttrs) => {
   return new Order(attrs);

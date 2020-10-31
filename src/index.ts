@@ -1,7 +1,15 @@
 import mongoose from 'mongoose';
 import { app } from './app';
-import { NotFoundError, logIt, LogType } from '@nielsendigital/ms-common';
-import { natsWrapper } from './nats-wrapper';
+import {
+  NotFoundError,
+  logIt,
+  LogType,
+  natsWrapper,
+} from '@nielsendigital/ms-common';
+import {
+  TicketCreatedListener,
+  TicketUpdatedListener,
+} from './events/listeners';
 
 const startApp = async () => {
   logIt.out(LogType.STARTED, 'orders service started');
@@ -68,6 +76,10 @@ const startApp = async () => {
     logIt.out(LogType.ERROR, err);
   }
 
+  // Event Listeners
+  new TicketCreatedListener(natsWrapper.client).listen();
+  new TicketUpdatedListener(natsWrapper.client).listen();
+
   // connect to MongoDB
 
   try {
@@ -87,7 +99,7 @@ const startApp = async () => {
 
   // Listen for traffic
   app.listen(3000, () => {
-    logIt.out(LogType.INFO, '>>>>> Orders service listening on port 3000.');
+    logIt.out(LogType.LISTEN, '>>>>> Orders service listening on port 3000.');
   });
 };
 

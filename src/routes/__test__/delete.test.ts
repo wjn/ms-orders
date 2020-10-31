@@ -4,7 +4,6 @@ import { app } from '../../app';
 import { OrderStatus } from '../../models/order';
 
 it('should give a 404 when the order does not exist', async () => {
-  const ticket = await global.buildTicket();
   await request(app)
     .post('/api/orders')
     // order as a different user
@@ -67,21 +66,13 @@ it('should give a 204 when the order is canceled', async () => {
   // make a request to cancel the order
   logIt.out(LogType.NOTICE, `requesting to delete order : ${order.id}`);
 
-  await request(app)
-    .delete(`/api/orders/${order.id}`)
-    .set('Cookie', user)
-    .send()
-    .expect(204);
+  await request(app).delete(`/api/orders/${order.id}`).set('Cookie', user).send().expect(204);
 
   // deleting an order calls the natsWrapper...publish() function a second time
   expect(natsWrapper.client.publish).toHaveBeenCalledTimes(2);
 
   // validate the order is canceled by fetching through the `show` route
-  const fetchedOrder = await request(app)
-    .get(`/api/orders/${order.id}`)
-    .set('Cookie', user)
-    .send()
-    .expect(200);
+  const fetchedOrder = await request(app).get(`/api/orders/${order.id}`).set('Cookie', user).send().expect(200);
 
   expect(fetchedOrder.body.status).toEqual(OrderStatus.CanceledByUser);
 });

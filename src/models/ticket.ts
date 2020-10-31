@@ -1,8 +1,8 @@
-import { logIt, LogType } from '@nielsendigital/ms-common';
 import mongoose from 'mongoose';
 import { Order, OrderStatus } from './order';
 
 interface TicketAttrs {
+  id?: string;
   title: string;
   price: number;
 }
@@ -10,11 +10,13 @@ interface TicketAttrs {
 export interface TicketDoc extends mongoose.Document {
   title: string;
   price: number;
+  version: number;
   isReserved(): Promise<boolean>;
 }
 
 export interface TicketModel extends mongoose.Model<TicketDoc> {
   build(attrs: TicketAttrs): TicketDoc;
+  findByIdAndPreviousVersion(event: { id: string; version: number }): Promise<TicketDoc | null>;
 }
 
 const ticketSchema = new mongoose.Schema(
@@ -39,8 +41,37 @@ const ticketSchema = new mongoose.Schema(
   }
 );
 
+// sets version key to 'version' (default is '_v')
+ticketSchema.set('versionKey', 'version');
+// ticketSchema.plugin(updateIfCurrentPlugin);
+
+// use the $where property to implement the updateIfCurrentPlugin functionality
+// that enforces optimistic concurrency control by managing the version number
+// when a record is saved.
+// https://mongoosejs.com/docs/api/model.html#model_Model-$where
+ticketSchema.pre('save', function (done) {
+  // @ts-ignore $where is not included properly in the mongoose type definition
+  this.$where = {
+    version: this.get('version') - 1,
+  };
+
+  done();
+});
+
+ticketSchema.statics.findByIdAndPreviousVersion = (event: { id: string; version: number }) => {
+  return Ticket.findOne({
+    _id: event.id,
+    version: event.version - 1,
+  });
+};
+
 ticketSchema.statics.build = (attrs: TicketAttrs) => {
-  return new Ticket(attrs);
+  const { id, title, price } = attrs;
+  return new Ticket({
+    _id: id,
+    title,
+    price,
+  });
 };
 
 /**
@@ -54,11 +85,7 @@ ticketSchema.methods.isReserved = async function (): Promise<boolean> {
   const existingOrder = await Order.findOne({
     ticket: this,
     status: {
-      $in: [
-        OrderStatus.Created,
-        OrderStatus.AwaitingPayment,
-        OrderStatus.Complete,
-      ],
+      $in: [OrderStatus.Created, OrderStatus.AwaitingPayment, OrderStatus.Complete],
     },
   });
 
