@@ -17,7 +17,8 @@ import { OrderCreatedPublisher } from '../events/publishers/order-created-publis
 const router = express.Router();
 
 // TODO: use the process.env.EXPIRATION_WINDOW_SECONDS k8s env var instead
-const EXPIRATION_WINDOW_SECONDS = 15 * 60;
+// const EXPIRATION_WINDOW_SECONDS = 15 * 60;
+const EXPIRATION_WINDOW_SECONDS = 0.25 * 60;
 
 router.post(
   '/api/orders',
