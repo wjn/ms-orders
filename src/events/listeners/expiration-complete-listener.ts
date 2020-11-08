@@ -7,6 +7,7 @@ import {
   logIt,
   OrderStatus,
   natsWrapper,
+  LogType,
 } from '@nielsendigital/ms-common';
 import { Message } from 'node-nats-streaming';
 import { Order } from '../../models/order';
@@ -17,12 +18,20 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
   readonly topic = Topics.ExpirationComplete;
 
   async onMessage(data: ExpirationCompleteEvent['data'], msg: Message) {
-    console.log(`>>>>>>>>>>>>>>>>. message data`, data);
-
+    logIt.out(
+      LogType.STARTED,
+      `ExpirationCompleteListener for OrderId ${data.orderId} on Topic ${this.topic} in the ${this.queueGroupName} queueGroup`
+    );
     const order = await Order.findById(data.orderId).populate('ticket');
 
     if (!order) {
       throw new NotFoundError('Order not found.');
+    }
+
+    // if the order has been paid for (orderStatus.Complete), insure that
+    // it cannot be cancelled by returning early and acking the message
+    if (order.status === OrderStatus.Complete) {
+      return msg.ack();
     }
 
     order.set({ status: OrderStatus.CanceledExpired });

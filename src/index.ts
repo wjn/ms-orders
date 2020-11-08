@@ -1,15 +1,7 @@
 import mongoose from 'mongoose';
 import { app } from './app';
-import {
-  NotFoundError,
-  logIt,
-  LogType,
-  natsWrapper,
-} from '@nielsendigital/ms-common';
-import {
-  TicketCreatedListener,
-  TicketUpdatedListener,
-} from './events/listeners';
+import { NotFoundError, logIt, LogType, natsWrapper } from '@nielsendigital/ms-common';
+import { TicketCreatedListener, TicketUpdatedListener, ExpirationCompleteListener } from './events/listeners';
 
 const startApp = async () => {
   logIt.out(LogType.STARTED, 'orders service started');
@@ -20,15 +12,11 @@ const startApp = async () => {
   }
 
   if (!process.env.EXPIRATION_WINDOW_SECONDS) {
-    throw new NotFoundError(
-      'EXPIRATION_WINDOW_SECONDS k8s env var must be defined.'
-    );
+    throw new NotFoundError('EXPIRATION_WINDOW_SECONDS k8s env var must be defined.');
   } else {
     logIt.out(
       LogType.INFO,
-      `Order expiration window set to ${
-        parseInt(process.env.EXPIRATION_WINDOW_SECONDS) / 60
-      } minutes.`
+      `Order expiration window set to ${parseInt(process.env.EXPIRATION_WINDOW_SECONDS) / 60} minutes.`
     );
   }
 
@@ -79,6 +67,7 @@ const startApp = async () => {
   // Event Listeners
   new TicketCreatedListener(natsWrapper.client).listen();
   new TicketUpdatedListener(natsWrapper.client).listen();
+  new ExpirationCompleteListener(natsWrapper.client).listen();
 
   // connect to MongoDB
 
