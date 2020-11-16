@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { app } from './app';
 import { NotFoundError, logIt, LogType, natsWrapper } from '@nielsendigital/ms-common';
 import { TicketCreatedListener, TicketUpdatedListener, ExpirationCompleteListener } from './events/listeners';
+import { PaymentCeatedListener } from './events/listeners/payment-created-listener';
 
 const startApp = async () => {
   logIt.out(LogType.STARTED, 'orders service started');
@@ -68,6 +69,7 @@ const startApp = async () => {
   new TicketCreatedListener(natsWrapper.client).listen();
   new TicketUpdatedListener(natsWrapper.client).listen();
   new ExpirationCompleteListener(natsWrapper.client).listen();
+  new PaymentCeatedListener(natsWrapper.client).listen();
 
   // connect to MongoDB
 
